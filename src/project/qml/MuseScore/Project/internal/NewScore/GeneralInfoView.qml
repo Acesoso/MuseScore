@@ -64,18 +64,14 @@ Column {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: parent.childWidth
-
             title: qsTrc("project", "Title")
-
             defaultText: qsTrc("project", "Untitled score")
-
-            navigationPanel: root.navigationPanel
-            navigationColumn: 0
-
-            // Use tab to navigate to the next itembox
-            focus: true
-            KeyNavigation.tab: subtitleInfo
+            TextInputField {
+                navigationPanel: root.navigationPanel
+                navigationColumn: 0
+            }
         }
+
         GeneralInfoItem {
             id: composerInfo
 
@@ -86,12 +82,10 @@ Column {
             title: qsTrc("project", "Composer")
 
             defaultText: qsTrc("project", "Composer / arranger")
-
-            navigationPanel: root.navigationPanel
-            navigationColumn: 1
-
-            focus: true
-            KeyNavigation.tab: subtitleInfo
+            TextInputField {
+                navigationPanel: root.navigationPanel
+                navigationColumn: 2
+            }
         }
     }
 
@@ -116,10 +110,10 @@ Column {
 
             defaultText: qsTrc("project", "Subtitle")
 
-            navigationPanel: root.navigationPanel
-            navigationColumn: 2
-
-            KeyNavigation.tab: lyricistInfo
+            TextInputField {
+                navigationPanel: root.navigationPanel
+                navigationColumn: 1
+            }
         }
 
         GeneralInfoItem {
@@ -131,10 +125,10 @@ Column {
 
             title: qsTrc("project", "Lyricist")
 
-            navigationPanel: root.navigationPanel
-            navigationColumn: 3
-
-            KeyNavigation.tab: copyrightInfo
+            TextInputField {
+                navigationPanel: root.navigationPanel
+                navigationColumn: 3
+            }
         }
     }
 
@@ -143,15 +137,14 @@ Column {
 
         anchors.left: parent.left
         anchors.right: parent.right
-
         isMultiLineEdit: true
 
         //: The caption of a field to specify copyright information
         title: qsTrc("project", "Copyright")
 
-        navigationPanel: root.navigationPanel
-        navigationColumn: 4
-
-        KeyNavigation.tab: doneButton
+        TextInputArea {
+            navigationPanel: root.navigationPanel
+            navigationColumn: 4
+        }
     }
 }

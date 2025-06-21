@@ -175,11 +175,11 @@ StyledDialogView {
                 }
             }
 
-            // The "Done" button is only enabled when the user has selected at least one instrument
-            Button {
-                id: doneButton
-                text: qsTr("Done")
-                focus: true
+            FlatButton {
+                text: qsTrc("global", "Done")
+                buttonRole: ButtonBoxModel.AcceptRole
+                buttonId: ButtonBoxModel.Done
+                accentButton: true
                 enabled: chooseInstrumentsAndTemplatePage.hasSelection
 
                 onClicked: {

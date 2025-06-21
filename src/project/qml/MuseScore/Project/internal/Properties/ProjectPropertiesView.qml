@@ -56,12 +56,7 @@ StyledListView {
     }
 
     delegate: PropertyItem {
-        anchors.left: parent ? parent.left : undefined
-        anchors.right: parent ? parent.right : undefined
-        anchors.rightMargin: root.propertyRowRightMargin
-
-        spacing: root.propertyRowHorizontalSpacing
-
+        navigationPanel: root.navigationPanel
         index: root.navigationColumnStart + model.index
         propertyName: model.propertyName
         propertyValue: model.propertyValue
@@ -69,8 +64,6 @@ StyledListView {
         isMultiLineEdit: model.isMultiLineEdit
         isFileInfoPanelProperty: false
         propertyNameWidth: root.propertyNameWidth
-
-        navigationPanel: root.navigationPanel
 
         onPropertyNameChanged: function() {
             model.propertyName = propertyName
@@ -93,7 +86,6 @@ StyledListView {
     FlatButton {
         id: closeButton
         text: qsTr("Ok")
-        Layout.alignment: Qt.AlignRight
         navigationPanel: root.navigationPanel
         navigationColumn: root.navigationColumnStart + propertiesModel.count
     }
