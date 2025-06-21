@@ -64,8 +64,11 @@ Column {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: parent.childWidth
+
             title: qsTrc("project", "Title")
+
             defaultText: qsTrc("project", "Untitled score")
+
             TextInputField {
                 navigationPanel: root.navigationPanel
                 navigationColumn: 0
@@ -82,6 +85,7 @@ Column {
             title: qsTrc("project", "Composer")
 
             defaultText: qsTrc("project", "Composer / arranger")
+
             TextInputField {
                 navigationPanel: root.navigationPanel
                 navigationColumn: 2
