@@ -33,7 +33,7 @@ MuseScore {
     property var onScreenVoice: null
     property var onScreenVerse: null
 
-    // Ajout de la sauvegarde persistante des paroles
+    // Added persistent lyrics saving
     Settings {
         id: lyricsSettings
         property string lastLyrics: ""
