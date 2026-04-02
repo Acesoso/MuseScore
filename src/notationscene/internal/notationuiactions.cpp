@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "notationuiactions.h"
 
 #include <unordered_map>
@@ -858,6 +859,20 @@ const UiActionList NotationUiActions::s_actions = {
              TranslatableString("action", "Break beam left"),
              IconCode::Code::BEAM_BREAK_LEFT
              ),
+    UiAction("beam-break-right",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Break beam right"),
+             TranslatableString("action", "Break beam connection with next note"),
+             IconCode::Code::BEAM_BREAK_RIGHT
+             ),
+    UiAction("beam-break-both",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Break beam on both sides"),
+             TranslatableString("action", "Break beam on both sides"),
+             IconCode::Code::BEAM_BREAK_BOTH
+             ),
     UiAction("beam-break-inner-8th",
              mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
@@ -872,12 +887,47 @@ const UiActionList NotationUiActions::s_actions = {
              TranslatableString("action", "Break inner beams (16th)"),
              IconCode::Code::BEAM_BREAK_INNER_16TH
              ),
+    UiAction("beam-break-inner-progressive",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Break inner beams progressive"),
+             TranslatableString("action", "Progressive inner beam break"),
+             IconCode::Code::BEAM_BREAK_INNER_PROGRESSIVE
+             ),
     UiAction("beam-join",
              mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
              TranslatableString("action", "Join beams"),
              TranslatableString("action", "Join beams"),
              IconCode::Code::BEAM_JOIN
+             ),
+    UiAction("beam-join-right",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Join beam right"),
+             TranslatableString("action", "Join beam with next note"),
+             IconCode::Code::BEAM_JOIN_RIGHT
+             ),
+    UiAction("beam-join-left",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Join beam left"),
+             TranslatableString("action", "Join beam with previous note"),
+             IconCode::Code::BEAM_JOIN_LEFT
+             ),
+    UiAction("beam-join-both",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Join beam both sides"),
+             TranslatableString("action", "Join beam on both sides"),
+             IconCode::Code::BEAM_JOIN_BOTH
+             ),
+    UiAction("beam-join-inner-progressive",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Join inner beams progressive"),
+             TranslatableString("action", "Progressive inner beam join"),
+             IconCode::Code::BEAM_JOIN_INNER_PROGRESSIVE
              ),
     UiAction("beam-feathered-decelerate",
              mu::context::UiCtxProjectOpened,

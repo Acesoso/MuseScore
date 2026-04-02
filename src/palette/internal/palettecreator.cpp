@@ -228,13 +228,25 @@ PalettePtr PaletteCreator::newBeamPalette()
     sp->setDrawGrid(true);
     sp->setVisible(false);
 
+    // Basic beam control
     sp->appendActionIcon(ActionIconType::BEAM_AUTO, "beam-auto")->mag = 1.4;
     sp->appendActionIcon(ActionIconType::BEAM_NONE, "beam-none")->mag = 1.4;
+    
+    // Directional break operations
+    sp->appendActionIcon(ActionIconType::BEAM_BREAK_RIGHT, "beam-break-right")->mag = 1.4;
     sp->appendActionIcon(ActionIconType::BEAM_BREAK_LEFT, "beam-break-left")->mag = 1.4;
-    sp->appendActionIcon(ActionIconType::BEAM_BREAK_INNER_8TH, "beam-break-inner-8th")->mag = 1.4;
-    sp->appendActionIcon(ActionIconType::BEAM_BREAK_INNER_16TH, "beam-break-inner-16th")->mag = 1.4;
-    sp->appendActionIcon(ActionIconType::BEAM_JOIN, "beam-join")->mag = 1.4;
-
+    sp->appendActionIcon(ActionIconType::BEAM_BREAK_BOTH, "beam-break-both")->mag = 1.4;
+    
+    // Directional join operations
+    sp->appendActionIcon(ActionIconType::BEAM_JOIN_RIGHT, "beam-join-right")->mag = 1.4;
+    sp->appendActionIcon(ActionIconType::BEAM_JOIN_LEFT, "beam-join-left")->mag = 1.4;
+    sp->appendActionIcon(ActionIconType::BEAM_JOIN_BOTH, "beam-join-both")->mag = 1.4;
+    
+    // Progressive inner break/join (smart toggle)
+    sp->appendActionIcon(ActionIconType::BEAM_BREAK_INNER_PROGRESSIVE, "")->mag = 1.4;
+    sp->appendActionIcon(ActionIconType::BEAM_JOIN_INNER_PROGRESSIVE, "")->mag = 1.4;
+    
+    // Feathered beams
     sp->appendActionIcon(ActionIconType::BEAM_FEATHERED_DECELERATE, "beam-feathered-decelerate");
     sp->appendActionIcon(ActionIconType::BEAM_FEATHERED_ACCELERATE, "beam-feathered-accelerate");
 

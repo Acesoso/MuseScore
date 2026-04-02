@@ -175,9 +175,16 @@ bool ChordRest::acceptDrop(EditData& data) const
         case ActionIconType::BEAM_AUTO:
         case ActionIconType::BEAM_NONE:
         case ActionIconType::BEAM_BREAK_LEFT:
+        case ActionIconType::BEAM_BREAK_RIGHT:
+        case ActionIconType::BEAM_BREAK_BOTH:
         case ActionIconType::BEAM_BREAK_INNER_8TH:
         case ActionIconType::BEAM_BREAK_INNER_16TH:
+        case ActionIconType::BEAM_BREAK_INNER_PROGRESSIVE:
         case ActionIconType::BEAM_JOIN:
+        case ActionIconType::BEAM_JOIN_RIGHT:
+        case ActionIconType::BEAM_JOIN_LEFT:
+        case ActionIconType::BEAM_JOIN_BOTH:
+        case ActionIconType::BEAM_JOIN_INNER_PROGRESSIVE:
             return true;
         default: break;
         }
@@ -389,6 +396,8 @@ EngravingItem* ChordRest::drop(EditData& data)
     case ElementType::ACTION_ICON:
     {
         ActionIconType actionType = toActionIcon(e)->actionType();
+
+        // Simple beam mode mapping for all ChordRest
         static const std::unordered_map<ActionIconType, BeamMode> beamModeTable = {
             { ActionIconType::BEAM_AUTO,             BeamMode::AUTO },
             { ActionIconType::BEAM_NONE,             BeamMode::NONE },
@@ -397,12 +406,146 @@ EngravingItem* ChordRest::drop(EditData& data)
             { ActionIconType::BEAM_BREAK_INNER_16TH, BeamMode::BEGIN32 },
             { ActionIconType::BEAM_JOIN,             BeamMode::MID },
         };
+
         if (muse::contains(beamModeTable, actionType)) {
             undoChangeProperty(Pid::BEAM_MODE, muse::value(beamModeTable, actionType));
             delete e;
             return nullptr;
         }
-        break;
+
+        // Complex beam operations requiring adjacent notes modification
+        // Only apply to chords, not rests
+        if (!isChord()) {
+            delete e;
+            return nullptr;
+        }
+
+        Chord* chord = toChord(this);
+        Segment* seg = segment();
+
+        // Find next and previous chord/rest in same voice
+        ChordRest* nextCR = nullptr;
+        ChordRest* prevCR = nullptr;
+
+        Segment* nextSeg = seg->next1(SegmentType::ChordRest);
+        while (nextSeg) {
+            ChordRest* cr = toChordRest(nextSeg->element(track()));
+            if (cr) {
+                nextCR = cr;
+                break;
+            }
+            nextSeg = nextSeg->next1(SegmentType::ChordRest);
+        }
+
+        Segment* prevSeg = seg->prev1(SegmentType::ChordRest);
+        while (prevSeg) {
+            ChordRest* cr = toChordRest(prevSeg->element(track()));
+            if (cr) {
+                prevCR = cr;
+                break;
+            }
+            prevSeg = prevSeg->prev1(SegmentType::ChordRest);
+        }
+
+        // Directional break operations
+        switch (actionType) {
+        case ActionIconType::BEAM_BREAK_RIGHT:
+            // Break connection to the right: set next chord to BEGIN
+            if (nextCR && nextCR->isChord()) {
+                nextCR->undoChangeProperty(Pid::BEAM_MODE, BeamMode::BEGIN);
+            }
+            break;
+
+        case ActionIconType::BEAM_BREAK_BOTH:
+            // Break both directions: current=BEGIN, next=BEGIN
+            undoChangeProperty(Pid::BEAM_MODE, BeamMode::BEGIN);
+            if (nextCR && nextCR->isChord()) {
+                nextCR->undoChangeProperty(Pid::BEAM_MODE, BeamMode::BEGIN);
+            }
+            break;
+
+        case ActionIconType::BEAM_JOIN_RIGHT:
+            // Join to the right: set to AUTO to connect
+            undoChangeProperty(Pid::BEAM_MODE, BeamMode::AUTO);
+            if (nextCR && nextCR->isChord()) {
+                nextCR->undoChangeProperty(Pid::BEAM_MODE, BeamMode::AUTO);
+            }
+            break;
+
+        case ActionIconType::BEAM_JOIN_LEFT:
+            // Join to the left: set to AUTO to let system beam from left
+            undoChangeProperty(Pid::BEAM_MODE, BeamMode::AUTO);
+            break;
+
+        case ActionIconType::BEAM_JOIN_BOTH:
+            // Join both directions: AUTO mode
+            undoChangeProperty(Pid::BEAM_MODE, BeamMode::AUTO);
+            if (nextCR && nextCR->isChord()) {
+                nextCR->undoChangeProperty(Pid::BEAM_MODE, BeamMode::AUTO);
+            }
+            break;
+
+        case ActionIconType::BEAM_BREAK_INNER_PROGRESSIVE:
+            // Smart toggle: cycle through break states (AUTO → BEGIN16 → BEGIN32 → BEGIN → AUTO...)
+            {
+                BeamMode current = beamMode();
+                BeamMode next = BeamMode::AUTO;
+
+                switch (current) {
+                case BeamMode::AUTO:
+                    next = BeamMode::BEGIN16;  // Break inner 8th
+                    break;
+                case BeamMode::BEGIN16:
+                    next = BeamMode::BEGIN32;  // Break inner 16th
+                    break;
+                case BeamMode::BEGIN32:
+                    next = BeamMode::BEGIN;    // Break left (all)
+                    break;
+                case BeamMode::BEGIN:
+                    next = BeamMode::AUTO;     // Back to auto
+                    break;
+                default:
+                    next = BeamMode::BEGIN16;
+                    break;
+                }
+                undoChangeProperty(Pid::BEAM_MODE, next);
+            }
+            break;
+
+        case ActionIconType::BEAM_JOIN_INNER_PROGRESSIVE:
+            // Reverse smart toggle: cycle backwards (AUTO → BEGIN → BEGIN32 → BEGIN16 → AUTO...)
+            {
+                BeamMode current = beamMode();
+                BeamMode next = BeamMode::AUTO;
+
+                switch (current) {
+                case BeamMode::AUTO:
+                    next = BeamMode::BEGIN;    // Break all
+                    break;
+                case BeamMode::BEGIN:
+                    next = BeamMode::BEGIN32;  // Break inner 16th
+                    break;
+                case BeamMode::BEGIN32:
+                    next = BeamMode::BEGIN16;  // Break inner 8th
+                    break;
+                case BeamMode::BEGIN16:
+                    next = BeamMode::AUTO;     // Back to auto
+                    break;
+                default:
+                    next = BeamMode::AUTO;
+                    break;
+                }
+                undoChangeProperty(Pid::BEAM_MODE, next);
+            }
+            break;
+
+        default:
+            delete e;
+            return nullptr;
+        }
+
+        delete e;
+        return nullptr;
     }
 
     case ElementType::KEYSIG:
