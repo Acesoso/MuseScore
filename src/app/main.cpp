@@ -21,6 +21,7 @@
  */
 
 #include <csignal>
+#include <cstdio>
 
 #include <QApplication>
 #include <QStyleHints>
@@ -67,6 +68,10 @@ static void app_init_qrc()
 
 int main(int argc, char** argv)
 {
+    // DEBUG: Print to verify main() is entered
+    fprintf(stdout, "DEBUG: MuseScore main() started\n");
+    fflush(stdout);
+    
 #ifndef MUSE_MODULE_DIAGNOSTICS_CRASHPAD_CLIENT
     signal(SIGSEGV, crashCallback);
     signal(SIGILL, crashCallback);
@@ -77,10 +82,16 @@ int main(int argc, char** argv)
     // Setup global Qt application variables
     // ====================================================
 
+    fprintf(stdout, "DEBUG: About to init QRC resources\n");
+    fflush(stdout);
     app_init_qrc();
+    fprintf(stdout, "DEBUG: QRC resources initialized\n");
+    fflush(stdout);
 
     qputenv("QT_STYLE_OVERRIDE", "Fusion");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
+    fprintf(stdout, "DEBUG: Qt environment variables set\n");
+    fflush(stdout);
 
     // HACK: Workaround for crash #28840. This disables the incremental GC
     if (!qEnvironmentVariableIsSet("MU_QV4_GC_TIMELIMIT")) {
@@ -110,7 +121,11 @@ int main(int argc, char** argv)
     }
 #endif
 
+    fprintf(stdout, "DEBUG: About to set style hints\n");
+    fflush(stdout);
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(250);
+    fprintf(stdout, "DEBUG: Style hints set\n");
+    fflush(stdout);
 
 #ifdef MUSE_APP_UNSTABLE
     QCoreApplication::setApplicationName(MUSE_APP_NAME_MACHINE_READABLE MUSE_APP_VERSION_MAJOR "Development");
@@ -153,10 +168,19 @@ int main(int argc, char** argv)
     CmdOptions opt = commandLineParser.options();
 
 #else
+    fprintf(stdout, "DEBUG: MUE_ENABLE_CONSOLEAPP not defined, using default GuiApp mode\n");
+    fflush(stdout);
+    fprintf(stdout, "DEBUG: Creating QApplication instance\n");
+    fflush(stdout);
     QCoreApplication* qapp = new QApplication(argc, argv);
+    fprintf(stdout, "DEBUG: QApplication created successfully\n");
+    fflush(stdout);
     CmdOptions opt;
     opt.runMode = IApplication::RunMode::GuiApp;
 #endif
+
+    fprintf(stdout, "DEBUG: About to setup application event loop\n");
+    fflush(stdout);
 
     // ====================================================
     // Setup application
@@ -167,16 +191,49 @@ int main(int argc, char** argv)
     // All subsequent initialization steps will be executed as events in the event loop.
 
     std::shared_ptr<muse::IApplication> app;
+    fprintf(stdout, "DEBUG: About to invoke AppFactory creation\n");
+    fflush(stdout);
     QMetaObject::invokeMethod(qapp, [qapp, &app, &opt]() {
+        fprintf(stdout, "DEBUG: Inside AppFactory lambda\n");
+        fflush(stdout);
         AppFactory f;
+        fprintf(stdout, "DEBUG: AppFactory created\n");
+        fflush(stdout);
         app = f.newApp(opt);
-        app->showSplash();
+        fprintf(stdout, "DEBUG: newApp() returned\n");
+        fflush(stdout);
+        try {
+            fprintf(stdout, "DEBUG: About to call showSplash()\n");
+            fflush(stdout);
+            // TEMPORARILY COMMENTED OUT
+            // app->showSplash();
+            fprintf(stdout, "DEBUG: showSplash() skipped for testing\n");
+            fflush(stdout);
+        } catch (const std::exception& e) {
+            fprintf(stdout, "DEBUG: Exception in showSplash: %s\n", e.what());
+            fflush(stdout);
+            return 1;
+        }
+        fprintf(stdout, "DEBUG: After showSplash try/catch\n");
+        fflush(stdout);
         QMetaObject::invokeMethod(qapp, [qapp, &app]() {
+            fprintf(stdout, "DEBUG: In second lambda - app->setup()\n");
+            fflush(stdout);
             app->setup();
+            fprintf(stdout, "DEBUG: app->setup() completed\n");
+            fflush(stdout);
             QMetaObject::invokeMethod(qapp, [qapp, &app]() {
+                fprintf(stdout, "DEBUG: In third lambda - app->showContextSplash()\n");
+                fflush(stdout);
                 app->showContextSplash();
+                fprintf(stdout, "DEBUG: app->showContextSplash() completed\n");
+                fflush(stdout);
                 QMetaObject::invokeMethod(qapp, [&app]() {
+                    fprintf(stdout, "DEBUG: In fourth lambda - app->setupNewContext()\n");
+                    fflush(stdout);
                     app->setupNewContext();
+                    fprintf(stdout, "DEBUG: app->setupNewContext() completed\n");
+                    fflush(stdout);
                 }, Qt::QueuedConnection);
             }, Qt::QueuedConnection);
         }, Qt::QueuedConnection);
@@ -185,17 +242,26 @@ int main(int argc, char** argv)
     // ====================================================
     // Run main loop
     // ====================================================
+    fprintf(stdout, "DEBUG: About to enter event loop with qapp->exec()\n");
+    fflush(stdout);
     int code = qapp->exec();
+    fprintf(stdout, "DEBUG: Event loop exited with code: %d\n", code);
+    fflush(stdout);
 
     // ====================================================
     // Quit
     // ====================================================
 
+    fprintf(stdout, "DEBUG: Cleaning up\n");
+    fflush(stdout);
     if (app) {
         app->finish();
     }
 
     delete qapp;
+
+    fprintf(stdout, "DEBUG: MuseScore main() closing normally\n");
+    fflush(stdout);
 
     LOGI() << "Goodbye!! code: " << code;
     return code;
